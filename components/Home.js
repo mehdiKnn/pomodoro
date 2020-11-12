@@ -1,5 +1,5 @@
 import React from 'react';
-import dismissKeyboard, {
+import {
     KeyboardAvoidingView,
     TextInput,
     SafeAreaView,
@@ -7,12 +7,9 @@ import dismissKeyboard, {
     FlatList,
     StyleSheet,
     Text,
-    StatusBar,
     TouchableWithoutFeedback,
     Platform,
     Keyboard,
-    Button,
-    Modal
 } from 'react-native';
 import {createStackNavigator} from "@react-navigation/stack";
 import {
@@ -31,19 +28,19 @@ let DATA = [
     {
         id: "1",
         title: 'First Item',
-        check: false,
+        checked: false,
         update: false,
     },
     {
         id: "2",
         title: 'Second Item',
-        check: false,
+        checked: false,
         update: false
     },
     {
         id: "3",
         title: 'Third Item',
-        check: false,
+        checked: false,
         update: false
     },
 ];
@@ -60,38 +57,7 @@ function HomeStackScreen() {
 const Home = () => {
     const [todos, setTodos] = React.useState(DATA)
 
-
-    const Item = ({title, id, check, update}) => (
-        <View style={styles.item}>
-            {check ?
-                <FontAwesomeIcon onPress={() => handleChecked(id, false)}
-                                 size={28}
-                                 color="#A3CA97"
-                                 icon={faCheckCircle}/> :
-                <FontAwesomeIcon onPress={() => handleChecked(id, true)}
-                                 size={28}
-                                 color="#F09D6C"
-                                 icon={faTimesCircle}/>}
-
-            {
-                update ?
-                    <TextInput  style={{ padding: 5, width:'50%' , borderColor: '#D3D3D3', borderWidth: 1, borderRadius: 3 }} value={title}
-                               onChangeText={(title) => handleUpdate(id, title)}
-                                onSubmitEditing={() => changeState(id,false)}
-                                returnKeyType="done"
-
-                    />
-                     : <Text style={{width: '50%'}} onLongPress={() => changeState(id,true)}>{title}</Text>
-
-            }
-
-            <FontAwesomeIcon onPress={() =>
-                handleDelete(id)
-            } size={26} icon={faTrash} color
-                ="#F7665E"/>
-        </View>
-    );
-    const changeState = (id, value) =>{
+    const changeState = (id, value) => {
         setTodos(todos.map(item => item.id === id ? {
             ...item,
             update: value
@@ -100,7 +66,7 @@ const Home = () => {
     const handleChecked = (id, check) => {
         setTodos(todos.map(item => item.id === id ? {
             ...item,
-            check: check
+            checked: check
         } : item))
     }
 
@@ -128,7 +94,41 @@ const Home = () => {
     }
 
     const renderItem = ({item}) => (
-        <Item update={item.update} check={item.check} title={item.title} id={item.id}/>
+        <View style={item.checked ? styles.checked : styles.item}>
+            {item.checked ?
+                <FontAwesomeIcon onPress={() => handleChecked(item.id, false)}
+                                 size={28}
+                                 color="#A3CA97"
+                                 icon={faCheckCircle}/> :
+                <FontAwesomeIcon onPress={() => handleChecked(item.id, true)}
+                                 size={28}
+                                 color="#F09D6C"
+                                 icon={faTimesCircle}/>}
+
+            {
+                item.update ?
+                    <TextInput style={{
+                        padding: 5,
+                        width: '50%',
+                        borderColor: '#D3D3D3',
+                        borderWidth: 1,
+                        borderRadius: 3
+                    }} value={item.title}
+                               onSubmitEditing={() => changeState(item.id, false)}
+                               onChangeText={(title) => handleUpdate(item.id, title)}
+                               returnKeyType="done"
+
+                    />
+                    : <Text style={{ width: '50%'}}
+                             onLongPress={item.checked ? null :() => changeState(item.id, true)}>{item.title}</Text>
+
+            }
+
+            <FontAwesomeIcon onPress={() =>
+                handleDelete(item.id)
+            } size={26} icon={faTrash} color
+                                 ="#F7665E"/>
+        </View>
     );
 
     const title = "Home"
@@ -139,13 +139,21 @@ const Home = () => {
         >
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                 <SafeAreaView style={styles.container}>
-                    <TextInput style={{ alignSelf:'center' ,margin:10 , padding: 15, width:'95%' , borderColor: '#D3D3D3', borderWidth: 1, borderRadius: 3 }} ref={myTextInput}
+                    <TextInput style={{
+                        alignSelf: 'center',
+                        margin: 10,
+                        padding: 15,
+                        width: '95%',
+                        borderColor: '#D3D3D3',
+                        borderWidth: 1,
+                        borderRadius: 3
+                    }} ref={myTextInput}
                                onSubmitEditing={text => handleDone(text)}
                                returnKeyType="done"
                                placeholder="New Task"/>
                     <FlatList style={styles.list}
                               data={todos}
-                              removeClippedSubViews={false}
+                              removeClippedSubViews={true}
                               renderItem={renderItem}
                               keyExtractor={item => item.id}
                     />
@@ -160,7 +168,6 @@ const styles = StyleSheet.create({
 
     container: {
         flex: 1,
-        marginTop: StatusBar.currentHeight || 0,
         backgroundColor: '#F8F9FA',
     },
     item: {
@@ -178,7 +185,25 @@ const styles = StyleSheet.create({
         shadowRadius: 0,
         shadowColor: '#E3BDE1',
         shadowOffset: {width: -5, height: 5},
+        elevation: 3
     },
+    checked:{
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        minHeight: 50,
+        backgroundColor: '#DAD9D7',
+        padding: 10,
+        marginVertical: 8,
+        marginHorizontal: 16,
+        borderRadius: 2,
+        shadowOpacity: 0.5,
+        shadowRadius: 0,
+        shadowColor: '#C2D5EC',
+        shadowOffset: {width: -5, height: 5},
+        elevation: 3
+    }
 });
 
 export default Home;
